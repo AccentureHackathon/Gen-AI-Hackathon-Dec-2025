@@ -1,11 +1,10 @@
 import os
-import json
-import requests
-from mcp.server.fastmcp import FastMCP
+from urllib.parse import urlparse
+
 import base64
-import re
-from xml.sax.saxutils import escape as xml_escape
+import requests
 from dotenv import load_dotenv
+from mcp.server.fastmcp import FastMCP
 
 load_dotenv()
 
@@ -145,7 +144,17 @@ class Adt:
     def __init__(self):
         self.session = requests.Session()
         self.session.auth = requests.auth.HTTPBasicAuth(SAP_USER, SAP_PASSWORD)
-        self.sap_host = 'swuerp1.salt-solutions.de:8000'
+        # Derive host (including port) from SAP_URL so request
+        # metadata reflects the actual configured endpoint.
+        parsed = urlparse(SAP_URL) if SAP_URL else None
+        if parsed and parsed.scheme and parsed.netloc:
+            self.sap_host = parsed.netloc
+        elif SAP_URL:
+            # Handle URLs without scheme, e.g. "host:8000" or "host"
+            fallback = urlparse(f"http://{SAP_URL}")
+            self.sap_host = fallback.netloc or SAP_URL
+        else:
+            self.sap_host = ""
         self.client = SAP_CLIENT
         self.language = SAP_LANGUAGE
 

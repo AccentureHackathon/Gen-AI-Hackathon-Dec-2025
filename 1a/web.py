@@ -105,6 +105,7 @@ async def run_agent(user_input: str, text_placeholder, tools_placeholder, sessio
 
 # web interface
 async def main():
+    st.logo("image.png", size="large")
     st.title("SAP Documentation Generator")
 
     # Initialize chat history
